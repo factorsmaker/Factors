@@ -38,11 +38,9 @@
       overscroll-behavior: none;
     }
 
-    /* ─── Screens ─────────────────────────────── */
     .screen { display: none; flex-direction: column; min-height: 100vh; }
     .screen.active { display: flex; }
 
-    /* ─── Lobby screen ────────────────────────── */
     #lobbyScreen {
       align-items: center;
       justify-content: center;
@@ -162,7 +160,6 @@
       font-weight: 500;
     }
 
-    /* ─── Waiting screen ──────────────────────── */
     #waitScreen {
       align-items: center;
       justify-content: center;
@@ -221,10 +218,7 @@
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* ─── Game screen ─────────────────────────── */
-    #gameScreen {
-      flex-direction: column;
-    }
+    #gameScreen { flex-direction: column; }
 
     .game-header {
       background: var(--card);
@@ -259,7 +253,6 @@
       width: 100%;
     }
 
-    /* Status bar */
     .status-bar {
       background: var(--navy);
       color: white;
@@ -275,11 +268,8 @@
       letter-spacing: 0.1px;
       transition: background 0.3s;
     }
-    .status-bar.waiting-other {
-      background: #4a4a6e;
-    }
+    .status-bar.waiting-other { background: #4a4a6e; }
 
-    /* Number grid */
     .number-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -338,7 +328,6 @@
     .num-btn.tier-cream .badge { color: #A89060; }
     .num-btn.tier-neon  .badge { color: #7A7200; }
 
-    /* Confirm button */
     .confirm-btn {
       padding: 15px;
       background: var(--navy);
@@ -355,7 +344,6 @@
     .confirm-btn.show { display: block; }
     .confirm-btn:active { opacity: 0.8; transform: scale(0.98); }
 
-    /* Legend */
     .legend {
       display: flex;
       flex-direction: column;
@@ -382,7 +370,6 @@
     .sw-cream { background: var(--cream); border-color: var(--cream-border); }
     .sw-neon  { background: var(--neon);  border-color: var(--neon-border); }
 
-    /* ─── Reveal panel ────────────────────────── */
     .reveal-panel {
       display: none;
       flex-direction: column;
@@ -489,7 +476,6 @@
     .next-btn.show { display: block; }
     .next-btn:active { opacity: 0.8; }
 
-    /* ─── Scoreboard ──────────────────────────── */
     .scoreboard {
       background: var(--card);
       border-top: 1px solid var(--border);
@@ -533,7 +519,6 @@
       font-weight: 600;
     }
 
-    /* ─── Overlay ─────────────────────────────── */
     .overlay {
       display: none;
       position: fixed;
@@ -559,7 +544,6 @@
     .overlay-card h2 { font-family: 'DM Serif Display', serif; font-size: 2rem; margin-bottom: 6px; }
     .overlay-card .sub { color: var(--muted); margin-bottom: 28px; font-size: 0.9rem; }
 
-    /* ─── Connection lost overlay ─────────────── */
     #disconnectOverlay {
       display: none;
       position: fixed;
@@ -573,7 +557,6 @@
     #disconnectOverlay.show { display: flex; }
     #disconnectOverlay .overlay-card p { color: var(--muted); margin-bottom: 24px; font-size: 0.88rem; line-height: 1.5; }
 
-    /* ─── Toast ───────────────────────────────── */
     .toast {
       position: fixed;
       bottom: 32px;
@@ -598,37 +581,12 @@
 </head>
 <body>
 
-<!-- ═══════════════════════════════════════
-     SCREEN 1 — LOBBY
-═══════════════════════════════════════ -->
 <div class="screen active" id="lobbyScreen">
   <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:32px 24px;">
     <div class="lobby-logo">Factors</div>
     <p class="lobby-tagline">Higher wins · unless the lower is a factor · bonus points for risky picks</p>
-
     <div class="lobby-card">
-      <!-- Config section — shown only before first game, collapsed after -->
-      <div id="configSection">
-        <h2>⚙️ Firebase Config</h2>
-        <p style="font-size:0.8rem; color:#888; margin-bottom:14px; line-height:1.5;">
-          Paste your Firebase config values below. You only need to do this once —
-          see the <strong>Setup Guide</strong> included with this file.
-        </p>
-        <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:14px;">
-          <input class="config-input" id="cfg_apiKey"         placeholder="apiKey"         style="padding:10px 12px; border:1.5px solid #e0e0e0; border-radius:9px; font-size:0.8rem; font-family:monospace; outline:none; color:#333;" />
-          <input class="config-input" id="cfg_authDomain"     placeholder="authDomain"     style="padding:10px 12px; border:1.5px solid #e0e0e0; border-radius:9px; font-size:0.8rem; font-family:monospace; outline:none; color:#333;" />
-          <input class="config-input" id="cfg_databaseURL"    placeholder="databaseURL"    style="padding:10px 12px; border:1.5px solid #e0e0e0; border-radius:9px; font-size:0.8rem; font-family:monospace; outline:none; color:#333;" />
-          <input class="config-input" id="cfg_projectId"      placeholder="projectId"      style="padding:10px 12px; border:1.5px solid #e0e0e0; border-radius:9px; font-size:0.8rem; font-family:monospace; outline:none; color:#333;" />
-          <input class="config-input" id="cfg_storageBucket"  placeholder="storageBucket"  style="padding:10px 12px; border:1.5px solid #e0e0e0; border-radius:9px; font-size:0.8rem; font-family:monospace; outline:none; color:#333;" />
-          <input class="config-input" id="cfg_messagingSenderId" placeholder="messagingSenderId" style="padding:10px 12px; border:1.5px solid #e0e0e0; border-radius:9px; font-size:0.8rem; font-family:monospace; outline:none; color:#333;" />
-          <input class="config-input" id="cfg_appId"          placeholder="appId"          style="padding:10px 12px; border:1.5px solid #e0e0e0; border-radius:9px; font-size:0.8rem; font-family:monospace; outline:none; color:#333;" />
-        </div>
-        <button class="btn-primary" id="saveConfigBtn" onclick="saveConfig()">Save &amp; Continue</button>
-        <div class="lobby-error" id="configError"></div>
-      </div>
-
-      <!-- Play section — shown after config saved -->
-      <div id="playSection" style="display:none;">
+      <div id="playSection">
         <h2 style="margin-bottom:16px;">🎮 Play</h2>
         <button class="btn-primary" onclick="createGame()">Create New Game</button>
         <div class="divider">or join with a code</div>
@@ -642,9 +600,6 @@
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════
-     SCREEN 2 — WAITING FOR OPPONENT
-═══════════════════════════════════════ -->
 <div class="screen" id="waitScreen">
   <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:32px 24px; gap:20px; text-align:center;">
     <div class="wait-code-label">Game Code</div>
@@ -659,20 +614,13 @@
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════
-     SCREEN 3 — GAME
-═══════════════════════════════════════ -->
 <div class="screen" id="gameScreen">
   <div class="game-header">
     <div class="game-header-title">Factors</div>
     <div class="room-badge" id="roomBadge">Room ----</div>
   </div>
-
   <div class="game-body">
-    <!-- Status -->
     <div class="status-bar" id="statusBar">Your turn — pick a number</div>
-
-    <!-- Pick phase -->
     <div id="pickPhase">
       <div class="number-grid" id="numberGrid"></div>
       <button class="confirm-btn" id="confirmBtn" onclick="confirmPick()">Confirm pick →</button>
@@ -682,8 +630,6 @@
         <div class="legend-row"><div class="legend-swatch sw-neon"></div><span>4 — win earns <strong>3 pts</strong></span></div>
       </div>
     </div>
-
-    <!-- Reveal phase -->
     <div class="reveal-panel" id="revealPhase">
       <div class="fraction-wrap">
         <div class="player-area">
@@ -700,8 +646,6 @@
       <button class="next-btn" id="nextBtn" onclick="startNextRound()">Next Round →</button>
     </div>
   </div>
-
-  <!-- Scoreboard -->
   <div class="scoreboard">
     <div class="score-item">
       <div class="score-label" id="p1ScoreLabel">Player 1</div>
@@ -716,9 +660,6 @@
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════
-     GAME OVER OVERLAY
-═══════════════════════════════════════ -->
 <div class="overlay" id="gameOverOverlay">
   <div class="overlay-card">
     <div class="trophy" id="gameOverTrophy">🏆</div>
@@ -728,9 +669,6 @@
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════
-     DISCONNECT OVERLAY
-═══════════════════════════════════════ -->
 <div id="disconnectOverlay">
   <div class="overlay-card">
     <div class="trophy">😴</div>
@@ -740,26 +678,16 @@
   </div>
 </div>
 
-<!-- Toast -->
 <div class="toast" id="toast"></div>
 
 <script>
-// ═══════════════════════════════════
-// CONSTANTS
-// ═══════════════════════════════════
-
 const WINNING_SCORE = 5;
-
 const POINT_MAP = { 2:2, 3:2, 4:3, 5:1, 6:2, 7:2, 8:2, 9:1, 10:1 };
 const TIER = { 2:'cream', 3:'cream', 4:'neon', 5:'', 6:'cream', 7:'cream', 8:'cream', 9:'', 10:'' };
 
-// ═══════════════════════════════════
-// STATE
-// ═══════════════════════════════════
-
 let db = null;
 let roomCode = null;
-let myRole = null;         // 'p1' | 'p2'
+let myRole = null;
 let myPickedNum = null;
 let gameRef = null;
 let gameListener = null;
@@ -768,60 +696,29 @@ let localP2Score = 0;
 let localRound = 1;
 let revealDone = false;
 
-// ═══════════════════════════════════
-// FIREBASE CONFIG
-// ═══════════════════════════════════
+const FIREBASE_CONFIG = {
+  apiKey:            "AIzaSyDccU2V3wGIYOZpU_H_X026FHP-OI4OMnU",
+  authDomain:        "factors-f7962.firebaseapp.com",
+  databaseURL:       "https://factors-f7962-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId:         "factors-f7962",
+  storageBucket:     "factors-f7962.firebasestorage.app",
+  messagingSenderId: "393557831342",
+  appId:             "1:393557831342:web:c23ea1b16a8c28a7fd073f"
+};
 
-const CONFIG_KEY = 'factors_firebase_config';
-
-function loadConfig() {
+function initFirebase() {
+  if (db) return;
   try {
-    const raw = localStorage.getItem(CONFIG_KEY);
-    return raw ? JSON.parse(raw) : null;
-  } catch { return null; }
-}
-
-function saveConfig() {
-  const fields = ['apiKey','authDomain','databaseURL','projectId','storageBucket','messagingSenderId','appId'];
-  const cfg = {};
-  for (const f of fields) {
-    const val = document.getElementById('cfg_' + f).value.trim();
-    if (!val) {
-      document.getElementById('configError').textContent = `Please fill in "${f}"`;
-      return;
-    }
-    cfg[f] = val;
-  }
-  try {
-    localStorage.setItem(CONFIG_KEY, JSON.stringify(cfg));
-    initFirebase(cfg);
-    document.getElementById('configSection').style.display = 'none';
-    document.getElementById('playSection').style.display = 'block';
-    document.getElementById('configError').textContent = '';
-  } catch(e) {
-    document.getElementById('configError').textContent = 'Invalid config: ' + e.message;
-  }
-}
-
-function initFirebase(cfg) {
-  if (db) return; // already init'd
-  try {
-    // If already initialized (e.g. hot reload), use existing app
     let app;
-    try { app = firebase.app(); } catch { app = firebase.initializeApp(cfg); }
+    try { app = firebase.app(); } catch { app = firebase.initializeApp(FIREBASE_CONFIG); }
     db = firebase.database();
   } catch(e) {
     console.error('Firebase init failed', e);
-    throw e;
   }
 }
 
-// ═══════════════════════════════════
-// ROOM MANAGEMENT
-// ═══════════════════════════════════
-
 function generateCode() {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ'; // no I/O to avoid confusion
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
   let c = '';
   for (let i = 0; i < 4; i++) c += chars[Math.floor(Math.random() * chars.length)];
   return c;
@@ -830,32 +727,19 @@ function generateCode() {
 async function createGame() {
   roomCode = generateCode();
   myRole = 'p1';
-
   const initialState = {
-    status: 'waiting',      // waiting | picking | revealing | done
-    p1Score: 0,
-    p2Score: 0,
-    round: 1,
-    p1Pick: null,
-    p2Pick: null,
-    p1Connected: true,
-    p2Connected: false,
+    status: 'waiting',
+    p1Score: 0, p2Score: 0, round: 1,
+    p1Pick: null, p2Pick: null,
+    p1Connected: true, p2Connected: false,
   };
-
   gameRef = db.ref('rooms/' + roomCode);
   await gameRef.set(initialState);
-
-  // Clean up room after 2 hours regardless
   gameRef.child('createdAt').set(Date.now());
-
-  // Set up disconnect cleanup
   gameRef.child('p1Connected').onDisconnect().set(false);
-
   showScreen('waitScreen');
   document.getElementById('waitCodeDisplay').textContent = roomCode;
   document.getElementById('roomBadge').textContent = 'Room ' + roomCode;
-
-  // Listen for p2 joining
   gameRef.child('p2Connected').on('value', snap => {
     if (snap.val() === true) {
       gameRef.child('p2Connected').off();
@@ -868,30 +752,16 @@ async function createGame() {
 async function joinGame() {
   const code = document.getElementById('joinCodeInput').value.trim().toUpperCase();
   const errEl = document.getElementById('joinError');
-
-  if (code.length !== 4) {
-    errEl.textContent = 'Code must be 4 letters.';
-    return;
-  }
-
+  if (code.length !== 4) { errEl.textContent = 'Code must be 4 letters.'; return; }
   const snap = await db.ref('rooms/' + code).once('value');
-  if (!snap.exists()) {
-    errEl.textContent = 'Room not found. Check the code and try again.';
-    return;
-  }
+  if (!snap.exists()) { errEl.textContent = 'Room not found. Check the code and try again.'; return; }
   const data = snap.val();
-  if (data.status !== 'waiting') {
-    errEl.textContent = 'That game has already started or finished.';
-    return;
-  }
-
+  if (data.status !== 'waiting') { errEl.textContent = 'That game has already started or finished.'; return; }
   roomCode = code;
   myRole = 'p2';
   gameRef = db.ref('rooms/' + roomCode);
-
   gameRef.child('p2Connected').onDisconnect().set(false);
   await gameRef.update({ p2Connected: true, status: 'picking' });
-
   document.getElementById('roomBadge').textContent = 'Room ' + roomCode;
   listenToGame();
   showScreen('gameScreen');
@@ -899,76 +769,43 @@ async function joinGame() {
 }
 
 function cancelGame() {
-  if (gameRef) {
-    gameRef.remove();
-    gameRef = null;
-  }
-  roomCode = null;
-  myRole = null;
+  if (gameRef) { gameRef.remove(); gameRef = null; }
+  roomCode = null; myRole = null;
   showScreen('lobbyScreen');
 }
 
-// ═══════════════════════════════════
-// GAME LISTENER
-// ═══════════════════════════════════
-
 function listenToGame() {
   if (gameListener) gameRef.off('value', gameListener);
-
   gameListener = gameRef.on('value', snap => {
-    if (!snap.exists()) {
-      // Room was deleted — opponent left
-      showDisconnect();
-      return;
-    }
+    if (!snap.exists()) { showDisconnect(); return; }
     const g = snap.val();
-
-    // Check opponent disconnect
     const opponentConnected = myRole === 'p1' ? g.p2Connected : g.p1Connected;
     if (opponentConnected === false && g.status !== 'waiting' && g.status !== 'done') {
-      showDisconnect();
-      return;
+      showDisconnect(); return;
     }
-
     localP1Score = g.p1Score || 0;
     localP2Score = g.p2Score || 0;
     localRound   = g.round   || 1;
-
     updateScoreboard();
     setPlayerLabels();
-
-    if (g.status === 'picking') {
-      renderPickPhase(g);
-    } else if (g.status === 'revealing') {
-      renderRevealPhase(g);
-    } else if (g.status === 'done') {
-      renderRevealPhase(g, true);
-    }
+    if (g.status === 'picking') renderPickPhase(g);
+    else if (g.status === 'revealing') renderRevealPhase(g);
+    else if (g.status === 'done') renderRevealPhase(g, true);
   });
 }
-
-// ═══════════════════════════════════
-// PICK PHASE
-// ═══════════════════════════════════
 
 function renderPickPhase(g) {
   document.getElementById('revealPhase').classList.remove('show');
   document.getElementById('pickPhase').style.display = 'block';
-
   const myPick = myRole === 'p1' ? g.p1Pick : g.p2Pick;
-  const theirPick = myRole === 'p1' ? g.p2Pick : g.p1Pick;
-
   if (myPick !== null && myPick !== undefined) {
-    // I've picked, waiting for them
     setStatus('Waiting for opponent…', true);
     buildGrid(true, myPick);
     document.getElementById('confirmBtn').classList.remove('show');
   } else {
-    // My turn to pick
     setStatus('Your turn — pick a number');
     buildGrid(false);
     if (myPickedNum !== null) {
-      // highlight already-selected
       highlightGrid(myPickedNum);
       document.getElementById('confirmBtn').classList.add('show');
     } else {
@@ -981,9 +818,8 @@ function buildGrid(disabled, selectedNum) {
   const grid = document.getElementById('numberGrid');
   grid.innerHTML = '';
   for (let n = 2; n <= 10; n++) {
-    const tier = TIER[n];
-    const pts  = POINT_MAP[n];
-    const btn  = document.createElement('button');
+    const tier = TIER[n], pts = POINT_MAP[n];
+    const btn = document.createElement('button');
     btn.className = 'num-btn' + (tier ? ` tier-${tier}` : '');
     if (selectedNum === n) btn.classList.add('selected-glow');
     btn.innerHTML = `${n}<span class="badge">+${pts}pt${pts > 1 ? 's' : ''}</span>`;
@@ -1010,45 +846,29 @@ function highlightGrid(n) {
 async function confirmPick() {
   if (myPickedNum === null) return;
   const field = myRole === 'p1' ? 'p1Pick' : 'p2Pick';
-  const otherField = myRole === 'p1' ? 'p2Pick' : 'p1Pick';
-
   await gameRef.update({ [field]: myPickedNum });
-
-  // Check if both have picked — if so, trigger reveal
   const snap = await gameRef.once('value');
   const g = snap.val();
   if (g.p1Pick !== null && g.p1Pick !== undefined &&
       g.p2Pick !== null && g.p2Pick !== undefined) {
     await gameRef.update({ status: 'revealing' });
   }
-
   document.getElementById('confirmBtn').classList.remove('show');
   setStatus('Waiting for opponent…', true);
   buildGrid(true, myPickedNum);
 }
 
-// ═══════════════════════════════════
-// REVEAL PHASE
-// ═══════════════════════════════════
-
 function renderRevealPhase(g, isFinalRound) {
-  if (revealDone && g.status !== 'done') return; // prevent re-render flicker
-
+  if (revealDone && g.status !== 'done') return;
   document.getElementById('pickPhase').style.display = 'none';
   document.getElementById('revealPhase').classList.add('show');
-
-  const p1n = g.p1Pick;
-  const p2n = g.p2Pick;
-
-  // Slot states
+  const p1n = g.p1Pick, p2n = g.p2Pick;
   setSlot('p1Slot', 'filled', p1n);
   setSlot('p2Slot', 'filled', p2n);
-
-  const winner    = determineWinner(p1n, p2n);
-  const reason    = getReason(p1n, p2n);
-  const resultEl  = document.getElementById('roundResult');
-  const nextBtn   = document.getElementById('nextBtn');
-
+  const winner = determineWinner(p1n, p2n);
+  const reason = getReason(p1n, p2n);
+  const resultEl = document.getElementById('roundResult');
+  const nextBtn = document.getElementById('nextBtn');
   if (winner === 'tie') {
     resultEl.innerHTML = "It's a tie — no points awarded.";
     setSlot('p1Slot', 'filled', p1n);
@@ -1058,18 +878,10 @@ function renderRevealPhase(g, isFinalRound) {
     const pts = POINT_MAP[winnerChoice];
     const ptLabel = pts === 1 ? '1 point' : `${pts} points`;
     const winName = winner === 'p1' ? (myRole === 'p1' ? 'You win' : 'They win') : (myRole === 'p2' ? 'You win' : 'They win');
-
     resultEl.innerHTML = `${winName}! (${reason})<br><span class="points-flash">+${ptLabel}</span>`;
-
-    if (winner === 'p1') {
-      setSlot('p1Slot', 'winner', p1n);
-      setSlot('p2Slot', 'loser',  p2n);
-    } else {
-      setSlot('p2Slot', 'winner', p2n);
-      setSlot('p1Slot', 'loser',  p1n);
-    }
+    if (winner === 'p1') { setSlot('p1Slot', 'winner', p1n); setSlot('p2Slot', 'loser', p2n); }
+    else { setSlot('p2Slot', 'winner', p2n); setSlot('p1Slot', 'loser', p1n); }
   }
-
   if (g.status === 'done' || g.p1Score >= WINNING_SCORE || g.p2Score >= WINNING_SCORE) {
     nextBtn.classList.remove('show');
     setTimeout(() => showGameOver(g), 1400);
@@ -1077,10 +889,8 @@ function renderRevealPhase(g, isFinalRound) {
   } else {
     nextBtn.classList.add('show');
     revealDone = true;
-
-    // Only host (p1) drives "Next Round" button to avoid double-trigger
     if (myRole === 'p2') {
-      nextBtn.style.display = 'none'; // p2 sees "waiting for next round"
+      nextBtn.style.display = 'none';
       setStatus('Waiting for host to continue…', true);
     } else {
       setStatus(`Round ${localRound} complete`);
@@ -1089,31 +899,18 @@ function renderRevealPhase(g, isFinalRound) {
 }
 
 async function startNextRound() {
-  if (myRole !== 'p1') return; // only host advances round
-
+  if (myRole !== 'p1') return;
   revealDone = false;
   myPickedNum = null;
-
-  await gameRef.update({
-    status: 'picking',
-    p1Pick: null,
-    p2Pick: null,
-    round: localRound + 1,
-  });
-
+  await gameRef.update({ status: 'picking', p1Pick: null, p2Pick: null, round: localRound + 1 });
   document.getElementById('nextBtn').classList.remove('show');
   document.getElementById('revealPhase').classList.remove('show');
   document.getElementById('pickPhase').style.display = 'block';
 }
 
-// ═══════════════════════════════════
-// GAME OVER
-// ═══════════════════════════════════
-
 function showGameOver(g) {
   const p1won = g.p1Score >= WINNING_SCORE;
-  const iWon  = (myRole === 'p1' && p1won) || (myRole === 'p2' && !p1won);
-
+  const iWon = (myRole === 'p1' && p1won) || (myRole === 'p2' && !p1won);
   document.getElementById('gameOverTrophy').textContent = iWon ? '🏆' : '😔';
   document.getElementById('gameOverTitle').textContent  = iWon ? 'You Win!' : 'You Lose';
   document.getElementById('gameOverSub').textContent    = `${g.p1Score}–${g.p2Score} · first to ${WINNING_SCORE}`;
@@ -1122,22 +919,9 @@ function showGameOver(g) {
 
 async function playAgain() {
   document.getElementById('gameOverOverlay').classList.remove('show');
-  revealDone = false;
-  myPickedNum = null;
-
-  await gameRef.update({
-    status: 'picking',
-    p1Score: 0,
-    p2Score: 0,
-    round: 1,
-    p1Pick: null,
-    p2Pick: null,
-  });
+  revealDone = false; myPickedNum = null;
+  await gameRef.update({ status: 'picking', p1Score: 0, p2Score: 0, round: 1, p1Pick: null, p2Pick: null });
 }
-
-// ═══════════════════════════════════
-// DISCONNECT
-// ═══════════════════════════════════
 
 function showDisconnect() {
   document.getElementById('disconnectOverlay').classList.add('show');
@@ -1150,10 +934,6 @@ function returnToLobby() {
   roomCode = null; myRole = null; myPickedNum = null; revealDone = false;
   showScreen('lobbyScreen');
 }
-
-// ═══════════════════════════════════
-// UI HELPERS
-// ═══════════════════════════════════
 
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -1201,9 +981,7 @@ function updateScoreboard() {
 async function shareCode() {
   const text = `Join my Factors game! Code: ${roomCode}`;
   if (navigator.share) {
-    try {
-      await navigator.share({ title: 'Factors', text });
-    } catch {}
+    try { await navigator.share({ title: 'Factors', text }); } catch {}
   } else {
     await navigator.clipboard.writeText(text);
     showToast('Code copied to clipboard!');
@@ -1216,10 +994,6 @@ function showToast(msg) {
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 2500);
 }
-
-// ═══════════════════════════════════
-// GAME LOGIC
-// ═══════════════════════════════════
 
 function isFactor(lo, hi) { return hi % lo === 0; }
 
@@ -1237,26 +1011,8 @@ function getReason(a, b) {
   return `${hi} is higher`;
 }
 
-// ═══════════════════════════════════
-// INIT — Check for saved config
-// ═══════════════════════════════════
-
 (function init() {
-  const cfg = loadConfig();
-  if (cfg) {
-    try {
-      initFirebase(cfg);
-      // Pre-fill inputs
-      Object.entries(cfg).forEach(([k, v]) => {
-        const el = document.getElementById('cfg_' + k);
-        if (el) el.value = v;
-      });
-      document.getElementById('configSection').style.display = 'none';
-      document.getElementById('playSection').style.display = 'block';
-    } catch(e) {
-      // Config was invalid, show config section
-    }
-  }
+  initFirebase();
 })();
 </script>
 </body>
