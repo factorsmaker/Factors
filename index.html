@@ -1,0 +1,1220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Factors — Online</title>
+
+  <!-- Firebase v9 compat (CDN) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;600;700&display=swap');
+
+    :root {
+      --navy: #1a1a2e;
+      --navy-mid: #2d2d4e;
+      --cream: #FAF4E0;
+      --cream-border: #E5D9B6;
+      --neon: #EDE030;
+      --neon-border: #C5BF00;
+      --green: #2e7d32;
+      --green-bg: #edf7ee;
+      --bg: #f5f5f2;
+      --card: #ffffff;
+      --border: #e8e8e4;
+      --muted: #888;
+      --radius: 16px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+    html, body {
+      height: 100%;
+      font-family: 'DM Sans', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--navy);
+      overscroll-behavior: none;
+    }
+
+    /* ─── Screens ─────────────────────────────── */
+    .screen { display: none; flex-direction: column; min-height: 100vh; }
+    .screen.active { display: flex; }
+
+    /* ─── Lobby screen ────────────────────────── */
+    #lobbyScreen {
+      align-items: center;
+      justify-content: center;
+      padding: 32px 24px;
+      gap: 0;
+    }
+
+    .lobby-logo {
+      font-family: 'DM Serif Display', serif;
+      font-size: 3.2rem;
+      color: var(--navy);
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+
+    .lobby-tagline {
+      font-size: 0.82rem;
+      color: var(--muted);
+      text-align: center;
+      margin-bottom: 40px;
+      max-width: 260px;
+      line-height: 1.5;
+    }
+
+    .lobby-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 28px 24px;
+      width: 100%;
+      max-width: 360px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+    }
+
+    .lobby-card h2 {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      color: var(--navy);
+    }
+
+    .btn-primary {
+      width: 100%;
+      padding: 15px;
+      background: var(--navy);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s;
+      letter-spacing: 0.1px;
+    }
+    .btn-primary:active { opacity: 0.8; transform: scale(0.98); }
+    .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 20px 0;
+      color: #ccc;
+      font-size: 0.78rem;
+    }
+    .divider::before, .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: #eee;
+    }
+
+    .code-input-wrap {
+      display: flex;
+      gap: 8px;
+    }
+
+    .code-input {
+      flex: 1;
+      padding: 14px 16px;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      font-family: 'DM Sans', monospace;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      text-align: center;
+      outline: none;
+      transition: border-color 0.15s;
+      color: var(--navy);
+      background: var(--bg);
+    }
+    .code-input:focus { border-color: var(--navy); background: white; }
+    .code-input::placeholder { letter-spacing: 1px; color: #ccc; font-size: 0.88rem; font-weight: 500; }
+
+    .btn-join {
+      padding: 14px 18px;
+      background: var(--navy);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: opacity 0.15s;
+      white-space: nowrap;
+    }
+    .btn-join:active { opacity: 0.8; }
+
+    .lobby-error {
+      color: #c0392b;
+      font-size: 0.8rem;
+      margin-top: 10px;
+      min-height: 18px;
+      font-weight: 500;
+    }
+
+    /* ─── Waiting screen ──────────────────────── */
+    #waitScreen {
+      align-items: center;
+      justify-content: center;
+      padding: 32px 24px;
+      gap: 24px;
+      text-align: center;
+    }
+
+    .wait-code-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .wait-code {
+      font-family: 'DM Serif Display', serif;
+      font-size: 4rem;
+      color: var(--navy);
+      letter-spacing: 10px;
+      line-height: 1;
+    }
+
+    .wait-share-hint {
+      font-size: 0.85rem;
+      color: var(--muted);
+      max-width: 260px;
+      line-height: 1.5;
+    }
+
+    .share-btn {
+      padding: 12px 24px;
+      background: var(--navy);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: opacity 0.15s;
+    }
+    .share-btn:active { opacity: 0.8; }
+
+    .wait-spinner {
+      width: 32px;
+      height: 32px;
+      border: 3px solid #eee;
+      border-top-color: var(--navy);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ─── Game screen ─────────────────────────── */
+    #gameScreen {
+      flex-direction: column;
+    }
+
+    .game-header {
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .game-header-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.4rem;
+      color: var(--navy);
+    }
+
+    .room-badge {
+      font-size: 0.72rem;
+      color: var(--muted);
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    .game-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 20px 16px;
+      gap: 16px;
+      max-width: 480px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    /* Status bar */
+    .status-bar {
+      background: var(--navy);
+      color: white;
+      padding: 12px 18px;
+      border-radius: 12px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      text-align: center;
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      letter-spacing: 0.1px;
+      transition: background 0.3s;
+    }
+    .status-bar.waiting-other {
+      background: #4a4a6e;
+    }
+
+    /* Number grid */
+    .number-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .num-btn {
+      aspect-ratio: 1;
+      border: 2px solid #e2e2e2;
+      background: white;
+      border-radius: 14px;
+      font-size: 1.6rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: border-color 0.12s, background 0.12s, transform 0.1s, box-shadow 0.12s;
+      color: var(--navy);
+      outline: none;
+      position: relative;
+      font-family: inherit;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .num-btn.tier-cream { background: var(--cream); border-color: var(--cream-border); }
+    .num-btn.tier-neon  { background: var(--neon);  border-color: var(--neon-border); }
+
+    .num-btn:active:not(:disabled) {
+      transform: scale(0.93);
+      box-shadow: 0 2px 8px rgba(26,26,46,0.2);
+    }
+    .num-btn.selected-glow {
+      border-color: var(--navy);
+      background: var(--navy);
+      color: white;
+      transform: scale(1.04);
+      box-shadow: 0 5px 18px rgba(26,26,46,0.25);
+    }
+    .num-btn.selected-glow .badge { color: rgba(255,255,255,0.6); }
+
+    .num-btn:disabled {
+      opacity: 0.28;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .num-btn .badge {
+      position: absolute;
+      top: 5px;
+      right: 7px;
+      font-size: 0.55rem;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+      color: #999;
+      line-height: 1;
+    }
+    .num-btn.tier-cream .badge { color: #A89060; }
+    .num-btn.tier-neon  .badge { color: #7A7200; }
+
+    /* Confirm button */
+    .confirm-btn {
+      padding: 15px;
+      background: var(--navy);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s;
+      display: none;
+    }
+    .confirm-btn.show { display: block; }
+    .confirm-btn:active { opacity: 0.8; transform: scale(0.98); }
+
+    /* Legend */
+    .legend {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      padding: 12px 14px;
+      background: white;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+    }
+    .legend-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.76rem;
+      color: #777;
+    }
+    .legend-swatch {
+      width: 14px; height: 14px;
+      border-radius: 4px;
+      border: 1.5px solid;
+      flex-shrink: 0;
+    }
+    .sw-white { background: white;        border-color: #e2e2e2; }
+    .sw-cream { background: var(--cream); border-color: var(--cream-border); }
+    .sw-neon  { background: var(--neon);  border-color: var(--neon-border); }
+
+    /* ─── Reveal panel ────────────────────────── */
+    .reveal-panel {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      padding: 8px 0;
+    }
+    .reveal-panel.show { display: flex; }
+
+    .fraction-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .player-area {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .player-slot {
+      width: 100px;
+      height: 100px;
+      border-radius: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.8rem;
+      font-weight: 700;
+      position: relative;
+      transition: background 0.25s, opacity 0.25s;
+    }
+
+    .player-slot.empty   { background: #eeeeee; color: #ccc; }
+    .player-slot.hidden  { background: var(--navy); }
+    .player-slot.hidden::after {
+      content: '?';
+      color: rgba(255,255,255,0.3);
+      font-size: 2.8rem;
+      font-weight: 700;
+      position: absolute;
+    }
+    .player-slot.filled  { background: #eef1fb; color: var(--navy); }
+    .player-slot.winner  {
+      background: var(--green-bg);
+      color: var(--green);
+      animation: bounce 0.55s ease-in-out infinite alternate;
+    }
+    .player-slot.loser   { background: #f0f0f0; color: #bbb; opacity: 0.5; }
+
+    @keyframes bounce {
+      from { transform: translateY(0) scale(1.05); }
+      to   { transform: translateY(-10px) scale(1.18); }
+    }
+
+    .player-label {
+      font-size: 0.7rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      font-weight: 600;
+    }
+    .player-label.you-label { color: var(--navy); font-weight: 700; }
+
+    .fraction-line {
+      width: 120px;
+      height: 3px;
+      background: var(--navy);
+      border-radius: 2px;
+      margin: 10px 0;
+    }
+
+    .round-result {
+      text-align: center;
+      font-size: 0.9rem;
+      color: #555;
+      font-weight: 500;
+      min-height: 44px;
+      line-height: 1.5;
+    }
+
+    .points-flash {
+      display: inline-block;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--green);
+    }
+
+    .next-btn {
+      padding: 13px 28px;
+      background: var(--navy);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      transition: opacity 0.15s;
+      display: none;
+    }
+    .next-btn.show { display: block; }
+    .next-btn:active { opacity: 0.8; }
+
+    /* ─── Scoreboard ──────────────────────────── */
+    .scoreboard {
+      background: var(--card);
+      border-top: 1px solid var(--border);
+      padding: 16px 24px;
+      display: flex;
+      justify-content: center;
+      gap: 48px;
+    }
+
+    .score-item { text-align: center; }
+
+    .score-label {
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--muted);
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .score-label.you-score { color: var(--navy); }
+
+    .score-pips {
+      display: flex;
+      gap: 6px;
+      justify-content: center;
+      margin-bottom: 5px;
+    }
+
+    .pip {
+      width: 11px; height: 11px;
+      border-radius: 50%;
+      border: 2px solid #ddd;
+      background: white;
+      transition: background 0.3s, border-color 0.3s;
+    }
+    .pip.filled { background: var(--navy); border-color: var(--navy); }
+
+    .score-num {
+      font-size: 0.72rem;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    /* ─── Overlay ─────────────────────────────── */
+    .overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .overlay.show { display: flex; }
+
+    .overlay-card {
+      background: white;
+      border-radius: 22px;
+      padding: 44px 36px;
+      text-align: center;
+      width: 100%;
+      max-width: 320px;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.2);
+    }
+    .overlay-card .trophy { font-size: 3rem; margin-bottom: 10px; }
+    .overlay-card h2 { font-family: 'DM Serif Display', serif; font-size: 2rem; margin-bottom: 6px; }
+    .overlay-card .sub { color: var(--muted); margin-bottom: 28px; font-size: 0.9rem; }
+
+    /* ─── Connection lost overlay ─────────────── */
+    #disconnectOverlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      z-index: 300;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    #disconnectOverlay.show { display: flex; }
+    #disconnectOverlay .overlay-card p { color: var(--muted); margin-bottom: 24px; font-size: 0.88rem; line-height: 1.5; }
+
+    /* ─── Toast ───────────────────────────────── */
+    .toast {
+      position: fixed;
+      bottom: 32px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--navy);
+      color: white;
+      padding: 11px 22px;
+      border-radius: 100px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      opacity: 0;
+      transition: transform 0.3s, opacity 0.3s;
+      z-index: 400;
+      white-space: nowrap;
+    }
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════
+     SCREEN 1 — LOBBY
+═══════════════════════════════════════ -->
+<div class="screen active" id="lobbyScreen">
+  <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:32px 24px;">
+    <div class="lobby-logo">Factors</div>
+    <p class="lobby-tagline">Higher wins · unless the lower is a factor · bonus points for risky picks</p>
+
+    <div class="lobby-card">
+      <!-- Play section -->
+      <div id="playSection">
+        <h2 style="margin-bottom:16px;">🎮 Play</h2>
+        <button class="btn-primary" onclick="createGame()">Create New Game</button>
+        <div class="divider">or join with a code</div>
+        <div class="code-input-wrap">
+          <input class="code-input" id="joinCodeInput" maxlength="4" placeholder="XXXX" oninput="this.value=this.value.toUpperCase().replace(/[^A-Z]/g,'')" />
+          <button class="btn-join" onclick="joinGame()">Join →</button>
+        </div>
+        <div class="lobby-error" id="joinError"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     SCREEN 2 — WAITING FOR OPPONENT
+═══════════════════════════════════════ -->
+<div class="screen" id="waitScreen">
+  <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:32px 24px; gap:20px; text-align:center;">
+    <div class="wait-code-label">Game Code</div>
+    <div class="wait-code" id="waitCodeDisplay">----</div>
+    <p class="wait-share-hint">Share this code with your opponent. They'll enter it on their phone to join.</p>
+    <button class="share-btn" id="shareBtn" onclick="shareCode()">
+      <span>📤</span> Share code
+    </button>
+    <div class="wait-spinner"></div>
+    <p style="font-size:0.82rem; color:var(--muted);">Waiting for opponent to join…</p>
+    <button onclick="cancelGame()" style="background:none;border:none;color:#bbb;font-size:0.8rem;cursor:pointer;font-family:inherit;margin-top:8px;">Cancel</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     SCREEN 3 — GAME
+═══════════════════════════════════════ -->
+<div class="screen" id="gameScreen">
+  <div class="game-header">
+    <div class="game-header-title">Factors</div>
+    <div class="room-badge" id="roomBadge">Room ----</div>
+  </div>
+
+  <div class="game-body">
+    <!-- Status -->
+    <div class="status-bar" id="statusBar">Your turn — pick a number</div>
+
+    <!-- Pick phase -->
+    <div id="pickPhase">
+      <div class="number-grid" id="numberGrid"></div>
+      <button class="confirm-btn" id="confirmBtn" onclick="confirmPick()">Confirm pick →</button>
+      <div class="legend" style="margin-top:12px;">
+        <div class="legend-row"><div class="legend-swatch sw-white"></div><span>5, 9, 10 — win earns <strong>1 pt</strong></span></div>
+        <div class="legend-row"><div class="legend-swatch sw-cream"></div><span>2, 3, 6, 7, 8 — win earns <strong>2 pts</strong></span></div>
+        <div class="legend-row"><div class="legend-swatch sw-neon"></div><span>4 — win earns <strong>3 pts</strong></span></div>
+      </div>
+    </div>
+
+    <!-- Reveal phase -->
+    <div class="reveal-panel" id="revealPhase">
+      <div class="fraction-wrap">
+        <div class="player-area">
+          <div class="player-slot empty" id="p1Slot"></div>
+          <div class="player-label" id="p1Label">Player 1</div>
+        </div>
+        <div class="fraction-line"></div>
+        <div class="player-area">
+          <div class="player-slot empty" id="p2Slot"></div>
+          <div class="player-label" id="p2Label">Player 2</div>
+        </div>
+      </div>
+      <div class="round-result" id="roundResult"></div>
+      <button class="next-btn" id="nextBtn" onclick="startNextRound()">Next Round →</button>
+    </div>
+  </div>
+
+  <!-- Scoreboard -->
+  <div class="scoreboard">
+    <div class="score-item">
+      <div class="score-label" id="p1ScoreLabel">Player 1</div>
+      <div class="score-pips" id="p1Pips"></div>
+      <div class="score-num" id="p1ScoreNum">0 / 5</div>
+    </div>
+    <div class="score-item">
+      <div class="score-label" id="p2ScoreLabel">Player 2</div>
+      <div class="score-pips" id="p2Pips"></div>
+      <div class="score-num" id="p2ScoreNum">0 / 5</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     GAME OVER OVERLAY
+═══════════════════════════════════════ -->
+<div class="overlay" id="gameOverOverlay">
+  <div class="overlay-card">
+    <div class="trophy" id="gameOverTrophy">🏆</div>
+    <h2 id="gameOverTitle">Player 1 Wins!</h2>
+    <p class="sub" id="gameOverSub">First to 5 points</p>
+    <button class="btn-primary" onclick="playAgain()">Play Again</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     DISCONNECT OVERLAY
+═══════════════════════════════════════ -->
+<div id="disconnectOverlay">
+  <div class="overlay-card">
+    <div class="trophy">😴</div>
+    <h2 style="margin-bottom:10px;">Opponent Left</h2>
+    <p>Your opponent disconnected. The game has ended.</p>
+    <button class="btn-primary" onclick="returnToLobby()">Back to Lobby</button>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════════
+
+const WINNING_SCORE = 5;
+
+const POINT_MAP = { 2:2, 3:2, 4:3, 5:1, 6:2, 7:2, 8:2, 9:1, 10:1 };
+const TIER = { 2:'cream', 3:'cream', 4:'neon', 5:'', 6:'cream', 7:'cream', 8:'cream', 9:'', 10:'' };
+
+// ═══════════════════════════════════
+// STATE
+// ═══════════════════════════════════
+
+let db = null;
+let roomCode = null;
+let myRole = null;         // 'p1' | 'p2'
+let myPickedNum = null;
+let gameRef = null;
+let gameListener = null;
+let localP1Score = 0;
+let localP2Score = 0;
+let localRound = 1;
+let revealDone = false;
+
+// ═══════════════════════════════════
+// FIREBASE CONFIG
+// ═══════════════════════════════════
+
+// ── Hardcoded Firebase config ──
+const FIREBASE_CONFIG = {
+  apiKey:            "AIzaSyDccU2V3wGIYOZpU_H_X026FHP-OI4OMnU",
+  authDomain:        "factors-f7962.firebaseapp.com",
+  databaseURL:       "https://factors-f7962-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId:         "factors-f7962",
+  storageBucket:     "factors-f7962.firebasestorage.app",
+  messagingSenderId: "393557831342",
+  appId:             "1:393557831342:web:c23ea1b16a8c28a7fd073f"
+};
+
+function initFirebase() {
+  if (db) return;
+  try {
+    let app;
+    try { app = firebase.app(); } catch { app = firebase.initializeApp(FIREBASE_CONFIG); }
+    db = firebase.database();
+  } catch(e) {
+    console.error('Firebase init failed', e);
+  }
+}
+
+// ═══════════════════════════════════
+// ROOM MANAGEMENT
+// ═══════════════════════════════════
+
+function generateCode() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ'; // no I/O to avoid confusion
+  let c = '';
+  for (let i = 0; i < 4; i++) c += chars[Math.floor(Math.random() * chars.length)];
+  return c;
+}
+
+async function createGame() {
+  roomCode = generateCode();
+  myRole = 'p1';
+
+  const initialState = {
+    status: 'waiting',      // waiting | picking | revealing | done
+    p1Score: 0,
+    p2Score: 0,
+    round: 1,
+    p1Pick: null,
+    p2Pick: null,
+    p1Connected: true,
+    p2Connected: false,
+  };
+
+  gameRef = db.ref('rooms/' + roomCode);
+  await gameRef.set(initialState);
+
+  // Clean up room after 2 hours regardless
+  gameRef.child('createdAt').set(Date.now());
+
+  // Set up disconnect cleanup
+  gameRef.child('p1Connected').onDisconnect().set(false);
+
+  showScreen('waitScreen');
+  document.getElementById('waitCodeDisplay').textContent = roomCode;
+  document.getElementById('roomBadge').textContent = 'Room ' + roomCode;
+
+  // Listen for p2 joining
+  gameRef.child('p2Connected').on('value', snap => {
+    if (snap.val() === true) {
+      gameRef.child('p2Connected').off();
+      listenToGame();
+      showScreen('gameScreen');
+    }
+  });
+}
+
+async function joinGame() {
+  const code = document.getElementById('joinCodeInput').value.trim().toUpperCase();
+  const errEl = document.getElementById('joinError');
+
+  if (code.length !== 4) {
+    errEl.textContent = 'Code must be 4 letters.';
+    return;
+  }
+
+  const snap = await db.ref('rooms/' + code).once('value');
+  if (!snap.exists()) {
+    errEl.textContent = 'Room not found. Check the code and try again.';
+    return;
+  }
+  const data = snap.val();
+  if (data.status !== 'waiting') {
+    errEl.textContent = 'That game has already started or finished.';
+    return;
+  }
+
+  roomCode = code;
+  myRole = 'p2';
+  gameRef = db.ref('rooms/' + roomCode);
+
+  gameRef.child('p2Connected').onDisconnect().set(false);
+  await gameRef.update({ p2Connected: true, status: 'picking' });
+
+  document.getElementById('roomBadge').textContent = 'Room ' + roomCode;
+  listenToGame();
+  showScreen('gameScreen');
+  errEl.textContent = '';
+}
+
+function cancelGame() {
+  if (gameRef) {
+    gameRef.remove();
+    gameRef = null;
+  }
+  roomCode = null;
+  myRole = null;
+  showScreen('lobbyScreen');
+}
+
+// ═══════════════════════════════════
+// GAME LISTENER
+// ═══════════════════════════════════
+
+function listenToGame() {
+  if (gameListener) gameRef.off('value', gameListener);
+
+  gameListener = gameRef.on('value', snap => {
+    if (!snap.exists()) {
+      // Room was deleted — opponent left
+      showDisconnect();
+      return;
+    }
+    const g = snap.val();
+
+    // Check opponent disconnect
+    const opponentConnected = myRole === 'p1' ? g.p2Connected : g.p1Connected;
+    if (opponentConnected === false && g.status !== 'waiting' && g.status !== 'done') {
+      showDisconnect();
+      return;
+    }
+
+    localP1Score = g.p1Score || 0;
+    localP2Score = g.p2Score || 0;
+    localRound   = g.round   || 1;
+
+    updateScoreboard();
+    setPlayerLabels();
+
+    if (g.status === 'picking') {
+      renderPickPhase(g);
+    } else if (g.status === 'revealing') {
+      renderRevealPhase(g);
+    } else if (g.status === 'done') {
+      renderRevealPhase(g, true);
+    }
+  });
+}
+
+// ═══════════════════════════════════
+// PICK PHASE
+// ═══════════════════════════════════
+
+function renderPickPhase(g) {
+  document.getElementById('revealPhase').classList.remove('show');
+  document.getElementById('pickPhase').style.display = 'block';
+
+  const myPick = myRole === 'p1' ? g.p1Pick : g.p2Pick;
+  const theirPick = myRole === 'p1' ? g.p2Pick : g.p1Pick;
+
+  if (myPick !== null && myPick !== undefined) {
+    // I've picked, waiting for them
+    setStatus('Waiting for opponent…', true);
+    buildGrid(true, myPick);
+    document.getElementById('confirmBtn').classList.remove('show');
+  } else {
+    // My turn to pick
+    setStatus('Your turn — pick a number');
+    buildGrid(false);
+    if (myPickedNum !== null) {
+      // highlight already-selected
+      highlightGrid(myPickedNum);
+      document.getElementById('confirmBtn').classList.add('show');
+    } else {
+      document.getElementById('confirmBtn').classList.remove('show');
+    }
+  }
+}
+
+function buildGrid(disabled, selectedNum) {
+  const grid = document.getElementById('numberGrid');
+  grid.innerHTML = '';
+  for (let n = 2; n <= 10; n++) {
+    const tier = TIER[n];
+    const pts  = POINT_MAP[n];
+    const btn  = document.createElement('button');
+    btn.className = 'num-btn' + (tier ? ` tier-${tier}` : '');
+    if (selectedNum === n) btn.classList.add('selected-glow');
+    btn.innerHTML = `${n}<span class="badge">+${pts}pt${pts > 1 ? 's' : ''}</span>`;
+    btn.disabled = disabled;
+    if (!disabled) btn.onclick = () => selectNum(n);
+    grid.appendChild(btn);
+  }
+}
+
+function selectNum(n) {
+  myPickedNum = n;
+  highlightGrid(n);
+  document.getElementById('confirmBtn').classList.add('show');
+}
+
+function highlightGrid(n) {
+  document.querySelectorAll('.num-btn').forEach(btn => {
+    const num = parseInt(btn.textContent);
+    if (num === n) btn.classList.add('selected-glow');
+    else btn.classList.remove('selected-glow');
+  });
+}
+
+async function confirmPick() {
+  if (myPickedNum === null) return;
+  const field = myRole === 'p1' ? 'p1Pick' : 'p2Pick';
+
+  await gameRef.update({ [field]: myPickedNum });
+
+  // Check if both have picked — if so, calculate scores and trigger reveal
+  const snap = await gameRef.once('value');
+  const g = snap.val();
+
+  if (g.p1Pick !== null && g.p1Pick !== undefined &&
+      g.p2Pick !== null && g.p2Pick !== undefined) {
+    const winner = determineWinner(g.p1Pick, g.p2Pick);
+    let newP1Score = g.p1Score || 0;
+    let newP2Score = g.p2Score || 0;
+
+    if (winner === 'p1') newP1Score += POINT_MAP[g.p1Pick];
+    else if (winner === 'p2') newP2Score += POINT_MAP[g.p2Pick];
+
+    const isGameOver = newP1Score >= WINNING_SCORE || newP2Score >= WINNING_SCORE;
+
+    await gameRef.update({
+      status: isGameOver ? 'done' : 'revealing',
+      p1Score: newP1Score,
+      p2Score: newP2Score,
+    });
+  }
+
+  document.getElementById('confirmBtn').classList.remove('show');
+  setStatus('Waiting for opponent…', true);
+  buildGrid(true, myPickedNum);
+}
+
+// ═══════════════════════════════════
+// REVEAL PHASE
+// ═══════════════════════════════════
+
+function renderRevealPhase(g, isFinalRound) {
+  if (revealDone && g.status !== 'done') return; // prevent re-render flicker
+
+  document.getElementById('pickPhase').style.display = 'none';
+  document.getElementById('revealPhase').classList.add('show');
+
+  const p1n = g.p1Pick;
+  const p2n = g.p2Pick;
+
+  // Slot states
+  setSlot('p1Slot', 'filled', p1n);
+  setSlot('p2Slot', 'filled', p2n);
+
+  const winner    = determineWinner(p1n, p2n);
+  const reason    = getReason(p1n, p2n);
+  const resultEl  = document.getElementById('roundResult');
+  const nextBtn   = document.getElementById('nextBtn');
+
+  if (winner === 'tie') {
+    resultEl.innerHTML = "It's a tie — no points awarded.";
+    setSlot('p1Slot', 'filled', p1n);
+    setSlot('p2Slot', 'filled', p2n);
+  } else {
+    const winnerChoice = winner === 'p1' ? p1n : p2n;
+    const pts = POINT_MAP[winnerChoice];
+    const ptLabel = pts === 1 ? '1 point' : `${pts} points`;
+    const winName = winner === 'p1' ? (myRole === 'p1' ? 'You win' : 'They win') : (myRole === 'p2' ? 'You win' : 'They win');
+
+    resultEl.innerHTML = `${winName}! (${reason})<br><span class="points-flash">+${ptLabel}</span>`;
+
+    if (winner === 'p1') {
+      setSlot('p1Slot', 'winner', p1n);
+      setSlot('p2Slot', 'loser',  p2n);
+    } else {
+      setSlot('p2Slot', 'winner', p2n);
+      setSlot('p1Slot', 'loser',  p1n);
+    }
+  }
+
+  if (g.status === 'done' || g.p1Score >= WINNING_SCORE || g.p2Score >= WINNING_SCORE) {
+    nextBtn.classList.remove('show');
+    setTimeout(() => showGameOver(g), 1400);
+    setStatus('Game over!');
+  } else {
+    nextBtn.classList.add('show');
+    revealDone = true;
+
+    // Only host (p1) drives "Next Round" button to avoid double-trigger
+    if (myRole === 'p2') {
+      nextBtn.style.display = 'none'; // p2 sees "waiting for next round"
+      setStatus('Waiting for host to continue…', true);
+    } else {
+      setStatus(`Round ${localRound} complete`);
+    }
+  }
+}
+
+async function startNextRound() {
+  if (myRole !== 'p1') return; // only host advances round
+
+  revealDone = false;
+  myPickedNum = null;
+
+  await gameRef.update({
+    status: 'picking',
+    p1Pick: null,
+    p2Pick: null,
+    round: localRound + 1,
+  });
+
+  document.getElementById('nextBtn').classList.remove('show');
+  document.getElementById('revealPhase').classList.remove('show');
+  document.getElementById('pickPhase').style.display = 'block';
+}
+
+// ═══════════════════════════════════
+// GAME OVER
+// ═══════════════════════════════════
+
+function showGameOver(g) {
+  const p1won = g.p1Score >= WINNING_SCORE;
+  const iWon  = (myRole === 'p1' && p1won) || (myRole === 'p2' && !p1won);
+
+  document.getElementById('gameOverTrophy').textContent = iWon ? '🏆' : '😔';
+  document.getElementById('gameOverTitle').textContent  = iWon ? 'You Win!' : 'You Lose';
+  document.getElementById('gameOverSub').textContent    = `${g.p1Score}–${g.p2Score} · first to ${WINNING_SCORE}`;
+  document.getElementById('gameOverOverlay').classList.add('show');
+}
+
+async function playAgain() {
+  document.getElementById('gameOverOverlay').classList.remove('show');
+  revealDone = false;
+  myPickedNum = null;
+
+  await gameRef.update({
+    status: 'picking',
+    p1Score: 0,
+    p2Score: 0,
+    round: 1,
+    p1Pick: null,
+    p2Pick: null,
+  });
+}
+
+// ═══════════════════════════════════
+// DISCONNECT
+// ═══════════════════════════════════
+
+function showDisconnect() {
+  document.getElementById('disconnectOverlay').classList.add('show');
+}
+
+function returnToLobby() {
+  document.getElementById('disconnectOverlay').classList.remove('show');
+  document.getElementById('gameOverOverlay').classList.remove('show');
+  if (gameRef) { gameRef.off(); gameRef = null; }
+  roomCode = null; myRole = null; myPickedNum = null; revealDone = false;
+  showScreen('lobbyScreen');
+}
+
+// ═══════════════════════════════════
+// UI HELPERS
+// ═══════════════════════════════════
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function setStatus(msg, dimmed) {
+  const el = document.getElementById('statusBar');
+  el.textContent = msg;
+  el.classList.toggle('waiting-other', !!dimmed);
+}
+
+function setSlot(id, mode, text) {
+  const el = document.getElementById(id);
+  el.className = 'player-slot ' + mode;
+  el.textContent = mode === 'hidden' ? '' : (text ?? '');
+}
+
+function setPlayerLabels() {
+  const p1IsMe = myRole === 'p1';
+  document.getElementById('p1Label').textContent = p1IsMe ? 'You' : 'Opponent';
+  document.getElementById('p2Label').textContent = p1IsMe ? 'Opponent' : 'You';
+  document.getElementById('p1Label').className = 'player-label' + (p1IsMe ? ' you-label' : '');
+  document.getElementById('p2Label').className = 'player-label' + (!p1IsMe ? ' you-label' : '');
+  document.getElementById('p1ScoreLabel').textContent = p1IsMe ? 'You' : 'Opponent';
+  document.getElementById('p2ScoreLabel').textContent = p1IsMe ? 'Opponent' : 'You';
+  document.getElementById('p1ScoreLabel').className = 'score-label' + (p1IsMe ? ' you-score' : '');
+  document.getElementById('p2ScoreLabel').className = 'score-label' + (!p1IsMe ? ' you-score' : '');
+}
+
+function updateScoreboard() {
+  ['p1','p2'].forEach(p => {
+    const score = p === 'p1' ? localP1Score : localP2Score;
+    const pipsEl = document.getElementById(p + 'Pips');
+    pipsEl.innerHTML = '';
+    for (let i = 0; i < WINNING_SCORE; i++) {
+      const pip = document.createElement('div');
+      pip.className = 'pip' + (i < score ? ' filled' : '');
+      pipsEl.appendChild(pip);
+    }
+    document.getElementById(p + 'ScoreNum').textContent = `${score} / ${WINNING_SCORE}`;
+  });
+}
+
+async function shareCode() {
+  const text = `Join my Factors game! Code: ${roomCode}`;
+  if (navigator.share) {
+    try {
+      await navigator.share({ title: 'Factors', text });
+    } catch {}
+  } else {
+    await navigator.clipboard.writeText(text);
+    showToast('Code copied to clipboard!');
+  }
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ═══════════════════════════════════
+// GAME LOGIC
+// ═══════════════════════════════════
+
+function isFactor(lo, hi) { return hi % lo === 0; }
+
+function determineWinner(a, b) {
+  if (a === b) return 'tie';
+  const lo = Math.min(a, b), hi = Math.max(a, b);
+  if (isFactor(lo, hi)) return a < b ? 'p1' : 'p2';
+  return a > b ? 'p1' : 'p2';
+}
+
+function getReason(a, b) {
+  if (a === b) return 'same number';
+  const lo = Math.min(a, b), hi = Math.max(a, b);
+  if (isFactor(lo, hi)) return `${lo} is a factor of ${hi}`;
+  return `${hi} is higher`;
+}
+
+// ═══════════════════════════════════
+// INIT
+// ═══════════════════════════════════
+
+(function init() {
+  initFirebase();
+})();
+</script>
+</body>
+</html>
