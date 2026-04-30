@@ -896,6 +896,14 @@ function listenToGame() {
     setPlayerLabels();
 
     if (g.status === 'picking') {
+      // Reset revealDone for both players when a new round starts
+      if (revealDone) {
+        revealDone = false;
+        myPickedNum = null;
+        document.getElementById('nextBtn').classList.remove('show');
+        document.getElementById('revealPhase').classList.remove('show');
+        document.getElementById('pickPhase').style.display = 'block';
+      }
       renderPickPhase(g);
     } else if (g.status === 'revealing') {
       renderRevealPhase(g);
